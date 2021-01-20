@@ -1,8 +1,25 @@
 'use strict';
+const arr = [{
+        "userName": "Олег Васильевич",
+        "nickname": "vasil",
+        "text": "Где детонатор?",
+        "postDate": "02.14.2012, 05:00"
+    },
+    {
+        "userName": "Brock",
+        "nickname": "brock",
+        "text": "По своей сути рыбатекст является альтернативой традиционному lorem ipsum, который вызывает у некторых людей недоумение при попытках прочитать рыбу текст. В отличии от lorem ipsum, текст рыба на русском языке наполнит любой макет непонятным смыслом и придаст неповторимый колорит советских времен.",
+        "postDate": "02.05.2012, 13:27",
+        "img": "https://fish-text.ru/images/logo.png",
+        "likes": 50
+    }
+]
 
 document.addEventListener('DOMContentLoaded', () => {
     class Twitter {
-        constructor({ listElem }) {
+        constructor({
+            listElem
+        }) {
             this.tweet = new Posts();
             this.elements = {
                 listElem: document.querySelector(listElem)
@@ -22,16 +39,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         showAllPost() {
-            
+
         }
 
         openModal() {
 
         }
     }
-    
+
     class Posts {
-        constructor({ posts = [] } = {} ) {
+        constructor({
+            posts = []
+        } = {}) {
             this.posts = posts;
         }
 
@@ -40,17 +59,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         deletePost(id) {
-            this.posts.find((item, i) => {
-                if (item.id === id) return posts.splice(i, 1);
-            });
-
-            
+            this.posts.splice(id, 1);
         }
 
         likePost(id) {
-            this.posts.find(item => {
-                if (item.id === id) return item.likes++;
-            });
+            this.posts.find((item, i) => {if (i === id) return item.likes++});
         }
     }
 
@@ -76,6 +89,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    const twitter = new Twitter({listElem: '.tweet-list'});
+    const twitter = new Twitter({
+        listElem: '.tweet-list'
+    });
     console.log(twitter);
 });
