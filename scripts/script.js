@@ -68,14 +68,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     class Post {
-        constructor(param) {
-            this.userName = param.userName;
-            this.nickname = param.nickname;
-            this.postData = param.postData;
-            this.text = param.text;
-            this.img = param.img;
-            this.likes = param.likes;
-            this.liked = param.liked;
+        constructor({
+            userName,
+            nickname,
+            postData,
+            text,
+            img = './images/unnamed.jpg',
+            likes = 0,
+            liked = false,
+        }) {
+            this.userName = userName;
+            this.nickname = nickname;
+            this.postData = postData;
+            this.text = text;
+            this.img = img;
+            this.likes = likes;
+            this.liked = liked;
         }
 
         changeLike() {
