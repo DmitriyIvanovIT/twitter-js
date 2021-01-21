@@ -1,49 +1,75 @@
 'use strict';
-const arr = [{
-        "userName": "Олег Васильевич",
-        "nickname": "vasil",
-        "text": "Где детонатор?",
-        "postDate": "02.14.2012, 05:00"
-    },
-    {
-        "userName": "Brock",
-        "nickname": "brock",
-        "text": "По своей сути рыбатекст является альтернативой традиционному lorem ipsum, который вызывает у некторых людей недоумение при попытках прочитать рыбу текст. В отличии от lorem ipsum, текст рыба на русском языке наполнит любой макет непонятным смыслом и придаст неповторимый колорит советских времен.",
-        "postDate": "02.05.2012, 13:27",
-        "img": "https://fish-text.ru/images/logo.png",
-        "likes": 50
-    },
-    {
-        "userName": "Raamin",
-        "nickname": "raamin",
-        "text": "По своей сути рыбатекст является альтернативой традиционному lorem ipsum, который вызывает у некторых людей недоумение при попытках прочитать рыбу текст. В отличии от lorem ipsum, текст рыба на русском языке наполнит любой макет непонятным смыслом и придаст неповторимый колорит советских времен.",
-        "postDate": "03.11.2012, 10:30",
-        "likes": 999
-    },
-    {
-        "userName": "Дональд",
-        "nickname": "trampampam",
-        "text": "Зарегался на вк, хороший сервис и не банят",
-        "postDate": "02.05.2012, 13:27",
-        "img": "https://i2.wp.com/media.globalnews.ca/videostatic/news/vamt80qbaq-94ovmaxjqg/trumptwitterupdate.jpg?w=500&quality=70&strip=all",
-        "likes": 50
-        
-    }
-];
 
 document.addEventListener('DOMContentLoaded', () => {
+    class FetchData {
+        getResourse = async url => {
+            const res = await fetch(url);
+            if (!res.ok) {
+                throw new Error(`Произошла ошибка ${res.status}`);
+
+            }
+            return res.json();
+        }
+
+        getPost = () => this.getResourse('db/database.json');
+    };
+
     class Twitter {
         constructor({
             listElem
         }) {
-            this.tweet = new Posts({posts: [...arr]});
+            const fetchData = new FetchData();
+            this.tweets = new Posts();
             this.elements = {
                 listElem: document.querySelector(listElem)
             }
+
+            fetchData.getPost()
+                .then(data => {
+                    
+                    data.forEach(this.tweets.addPost);
+
+                    this.showAllPost();
+                });
+
         }
 
-        renderPosts() {
+        renderPosts(tweets) {
+            this.elements.listElem.textContent = '';
 
+            tweets.forEach(({ id, userName, nickname, getDate, text, img, likes }) => {
+                this.elements.listElem.insertAdjacentHTML('beforeend', `
+                    <li>
+                        <article class="tweet">
+                            <div class="row">
+                                <img class="avatar" src="images/${nickname}.jpg" alt="Аватар пользователя ${userName}">
+                                <div class="tweet__wrapper">
+                                    <header class="tweet__header">
+                                        <h3 class="tweet-author">${userName}
+                                            <span class="tweet-author__add tweet-author__nickname">@${nickname}</span>
+                                            <time class="tweet-author__add tweet__date">${getDate()}</time>
+                                        </h3>
+                                        <button class="tweet__delete-button chest-icon" data-id="${id}"></button>
+                                    </header>
+                                    <div class="tweet-post">
+                                        <p class="tweet-post__text">${text}</p>
+                                        ${img ? `
+                                        <figure class="tweet-post__image">
+                                            <img src="${img}" alt="Сообщение ${nickname}  ${text}">
+                                        </figure>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                            <footer>
+                                <button class="tweet__like">
+                                    ${likes}
+                                </button>
+                            </footer>
+                        </article>
+                    </li>
+                `);
+            });
         }
 
         showUserPost() {
@@ -55,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         showAllPost() {
-
+            this.renderPosts(this.tweets.posts);
         }
 
         openModal() {
@@ -70,32 +96,35 @@ document.addEventListener('DOMContentLoaded', () => {
             this.posts = posts;
         }
 
-        addPost(tweet) {
-            this.posts.push(new Post(tweet));
+        addPost = (tweets) => {
+            this.posts.push(new Post(tweets));
         }
 
         deletePost(id) {
-            this.posts.splice(id, 1);
+            this.posts.find((item, i) => {if (item.id === id) return this.posts.splice(i, 1);});
+            
         }
 
         likePost(id) {
-            this.posts.find((item, i) => {if (i === id) return item.likes++});
+            this.posts.find((item, i) => {if (item.id === id) return item.likes++});
         }
     }
 
     class Post {
         constructor({
+            id,
             userName,
             nickname,
-            postData,
+            postDate,
             text,
-            img = './images/unnamed.jpg',
+            img,
             likes = 0,
-            liked = false,
+            liked = false
         }) {
+            this.id = id || this.generateID();
             this.userName = userName;
             this.nickname = nickname;
-            this.postData = postData;
+            this.postDate = postDate ? new Date(postDate) : new Date();
             this.text = text;
             this.img = img;
             this.likes = likes;
@@ -111,16 +140,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.likes--;
             }
         }
+
+        generateID() {
+            return ((+new Date).toString(32) + Math.random().toString(32).substring(2, 9));
+        }
+
+        getDate = () => {
+            const options = {
+                year: 'numeric',
+                month: 'numeric',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            }
+            return this.postDate.toLocaleTimeString('ru-Ru', options);
+        }
     }
 
-    const twitter = new Twitter({
-        listElem: '.tweet-list'
-    });
-
-    console.log(arr);
-
-    twitter.tweet.deletePost(1);
-    twitter.tweet.likePost(1);
-
-    console.log(twitter.tweet.posts);
+    const twitter = new Twitter({listElem: '.tweet-list'});
 });
