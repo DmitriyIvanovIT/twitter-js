@@ -16,12 +16,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     class Twitter {
         constructor({
-            listElem
+            listElem,
+            modalElems
         }) {
             const fetchData = new FetchData();
             this.tweets = new Posts();
             this.elements = {
-                listElem: document.querySelector(listElem)
+                listElem: document.querySelector(listElem),
+                modal: modalElems
             }
 
             fetchData.getPost()
@@ -31,6 +33,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     this.showAllPost();
                 });
+
+            this.elements.modal.forEach(this.handlerModal, this);
 
         }
 
@@ -84,8 +88,29 @@ document.addEventListener('DOMContentLoaded', () => {
             this.renderPosts(this.tweets.posts);
         }
 
-        openModal() {
+        handlerModal({ button, modal, overlay, close }) {
+            const buttonElem = document.querySelector(button),
+            modalElem = document.querySelector(modal),
+            overlayElem = document.querySelector(overlay),
+            closeElem = document.querySelector(close);
 
+            const openModal = () => {
+                modalElem.style.display = 'block';
+            }, 
+            closeModal = (elem, e) => {
+                const target = e.target;
+
+                if (target === elem) {
+                    modalElem.style.display = 'none';
+                }
+
+            }
+
+            buttonElem.addEventListener('click', openModal);
+            
+            closeElem.addEventListener('click', closeModal.bind(null, closeElem));
+
+            overlayElem.addEventListener('click', closeModal.bind(null, overlayElem));
         }
     }
 
@@ -157,5 +182,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    const twitter = new Twitter({listElem: '.tweet-list'});
+    const twitter = new Twitter({
+        listElem: '.tweet-list',
+        modalElems: [{
+            button: '.header__link_tweet',
+            modal: '.modal',
+            overlay: '.overlay',
+            close: '.modal-close__btn'
+        }]
+        
+    });
 });
